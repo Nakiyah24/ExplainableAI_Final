@@ -1,0 +1,16 @@
+{
+  "age": [
+    "age"
+  ],
+  "sex": [
+    "sex_1",
+    "sex_2"
+  ],
+  "race_ethnicity": [
+    "race_ethnicity_1",
+    "race_ethnicity_2",
+    "race_ethnicity_3",
+    "race_ethnicity_4",
+    "race_ethnicity_5"
+  ]
+}

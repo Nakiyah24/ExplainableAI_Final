@@ -1,2 +1,14 @@
-ideas/*
-data/meps_2023/extra/*
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+*.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+data/meps_2023/*
