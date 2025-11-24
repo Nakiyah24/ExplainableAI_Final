@@ -630,6 +630,23 @@ except Exception as e:
 # Textual summary
 st.markdown("")  # Spacing
 st.subheader("Summary")
+
+with st.expander("ℹ️ Understanding the Summary"):
+        st.markdown("""
+This summary highlights the **top 3 features** that are most responsible for increasing or decreasing 
+this patient's predicted hospitalization risk.
+
+- **Features that increase risk** (positive SHAP values): These characteristics push the prediction 
+  higher than the average patient, making hospitalization more likely.
+  
+- **Features that decrease risk** (negative SHAP values): These characteristics push the prediction 
+  lower than the average patient, making hospitalization less likely.
+
+The features are ranked by the magnitude of their SHAP contribution - the features listed have the 
+strongest impact on this specific prediction. Note that the same feature might affect different 
+patients differently depending on their other characteristics.
+        """)
+
 summary_text = generate_shap_summary(shap_values, pretty_feature_names)
 if summary_text:
         st.info(summary_text)
