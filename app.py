@@ -564,13 +564,13 @@ with st.expander("ℹ️ How to read this chart"):
         st.markdown("""
 The waterfall chart shows how each feature contributes to move the prediction from the **expected value** (base value) to this specific patient's prediction.
 
-- **Left (base value)**: The model's average output across all training examples (expected value)
-- **Middle bars**: Each feature's SHAP contribution - how much it pushes the prediction away from the base value
-  - Red bars: Positive contributions (increase risk)
-  - Blue bars: Negative contributions (decrease risk)
-- **Right (final value)**: The sum of base value + all SHAP contributions = this patient's predicted risk
+- **Right side (base value)**: The model's average output across all training examples (expected value), denoted as E[f(x)]
+- **Horizontal bars**: Each horizontal bar represents a feature's SHAP contribution - how much it pushes the prediction away from the base value
+  - **Red bars**: Positive contributions that extend to the right (increase risk/higher log-odds)
+  - **Blue bars**: Negative contributions that extend to the left (decrease risk/lower log-odds)
+- **Left side (final value)**: The final prediction for this patient, denoted as f(x), which equals the base value plus all SHAP contributions
 
-The features are ordered by the magnitude of their contribution, with the most influential features at the top. The bars accumulate from left to right, showing how each feature moves the prediction toward the final value.
+The features are listed vertically on the left, ordered by the magnitude of their contribution (most influential at the top).
         """)
 
 
