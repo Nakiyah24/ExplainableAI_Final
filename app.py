@@ -38,24 +38,58 @@ st.markdown("""
 # Loading the model and SHAP explainer - using cache so it doesn't reload every time
 @st.cache_resource
 def load_model():
+    """
+    Load the trained LightGBM model from disk.
+    
+    Uses Streamlit's cache_resource decorator to ensure the model is only loaded once
+    and reused across app reruns for better performance.
+    
+    Returns:
+        Trained LightGBM classifier model
+    """
     model_path = Path("fairness_artifacts/final_lightgbm_model.pkl")
     model = joblib.load(model_path)
     return model
 
 @st.cache_resource
 def load_explainer():
+    """
+    Load the pre-computed SHAP explainer from disk.
+    
+    The explainer was trained on the training data and is used to generate
+    SHAP values for individual predictions in real-time.
+    
+    Returns:
+        SHAP explainer object
+    """
     explainer_path = Path("fairness_results/shap_explainer.pkl")
     return joblib.load(explainer_path)
 
 @st.cache_data
 def load_feature_template():
-    # Need this to know what columns the model expects
+    """
+    Load the feature column names from training data.
+    
+    This ensures we know exactly what features the model expects and in what order.
+    Critical for creating feature vectors that match the training format.
+    
+    Returns:
+        List of feature column names
+    """
     X_train = pd.read_parquet("fairness_artifacts/X_train.parquet")
     return X_train.columns.tolist()
 
 @st.cache_resource
 def get_model_feature_order():
-    # Model has feature names in a specific order, need to match that
+    """
+    Get the exact feature order expected by the trained model.
+    
+    LightGBM models store feature names in a specific order. This function
+    retrieves that order to ensure feature vectors match exactly.
+    
+    Returns:
+        List of feature names in the order expected by the model
+    """
     model = load_model()
     if hasattr(model, 'feature_name_') and model.feature_name_ is not None:
         return list(model.feature_name_)
@@ -65,7 +99,16 @@ def get_model_feature_order():
 
 @st.cache_data
 def get_default_values():
-    # Get median values for features that might not be set
+    """
+    Get default (median) values for optional features.
+    
+    Some features like years_in_us, education_years, and family_income
+    may not be set by the user. This function provides median values from
+    the training data as defaults.
+    
+    Returns:
+        Dictionary with default values for optional features
+    """
     X_train = pd.read_parquet("fairness_artifacts/X_train.parquet")
     return {
         'years_in_us': float(X_train['years_in_us'].median()),
@@ -117,8 +160,32 @@ def create_feature_vector(age, sex, race_ethnicity, poverty_category,
                          insurance_coverage, region, hypertension, diabetes, 
                          asthma, smoker, years_in_us=None, education_years=None, 
                          family_income=None):
-    # Takes user inputs and converts them to the format the model expects
-    # This was tricky - had to match the exact feature order from training
+    """
+    Convert user inputs into a feature vector matching the model's expected format.
+    
+    This function takes all the user inputs from the Streamlit sidebar and converts
+    them into a pandas DataFrame with the exact same structure as the training data.
+    This includes one-hot encoding categorical variables and matching the exact
+    feature order expected by the LightGBM model.
+    
+    Args:
+        age: Patient age (0-90)
+        sex: "Male" or "Female"
+        race_ethnicity: One of ["Hispanic", "White", "Black", "Asian", "Other/multiple"]
+        poverty_category: Poverty level category
+        insurance_coverage: Insurance type
+        region: Geographic region
+        hypertension: Boolean for hypertension diagnosis
+        diabetes: Boolean for diabetes diagnosis
+        asthma: Boolean for asthma diagnosis
+        smoker: Smoking status
+        years_in_us: Optional, defaults to median if not provided
+        education_years: Optional, defaults to median if not provided
+        family_income: Optional, defaults to median if not provided
+    
+    Returns:
+        pandas DataFrame with one row containing the feature vector
+    """
     if years_in_us is None:
         years_in_us = default_values['years_in_us']
     if education_years is None:
@@ -180,7 +247,15 @@ def create_feature_vector(age, sex, race_ethnicity, poverty_category,
     return features
 
 def get_risk_category(probability):
-    # Simple risk categorization
+    """
+    Categorize predicted probability into risk levels.
+    
+    Args:
+        probability: Predicted probability of hospitalization (0-1)
+    
+    Returns:
+        Tuple of (risk_category_string, emoji) for display
+    """
     if probability < 0.1:
         return "Low", "🟢"
     elif probability < 0.25:
@@ -189,8 +264,20 @@ def get_risk_category(probability):
         return "High", "🔴"
 
 def generate_shap_summary(shap_values, feature_names, top_n=8):
-    # Makes a simple text summary of what's driving the prediction
-    # feature_names should already be cleaned up
+    """
+    Generate a human-readable text summary of SHAP values.
+    
+    Identifies the top features that increase risk and decrease risk,
+    then formats them into a natural language explanation.
+    
+    Args:
+        shap_values: Array of SHAP values for each feature
+        feature_names: List of feature names (should be human-readable)
+        top_n: Number of top features to include in summary
+    
+    Returns:
+        String summary of what's driving the prediction
+    """
     shap_df = pd.DataFrame({
         'feature': feature_names,
         'shap_value': shap_values
@@ -217,7 +304,19 @@ def generate_shap_summary(shap_values, feature_names, top_n=8):
     return " ".join(summary_parts)
 
 def pretty_feature_name(col: str) -> str:
-    # Converting to readable feature names
+    """
+    Convert internal feature names to human-readable labels.
+    
+    Model features use codes like 'sex_1', 'race_ethnicity_2', etc.
+    This function converts them to readable names like 'Sex: Male',
+    'Race/ethnicity: White', etc. for display in the UI.
+    
+    Args:
+        col: Internal feature column name
+    
+    Returns:
+        Human-readable feature name
+    """
     base_label_map = {
         "age": "Age",
         "education_years": "Years of education",
@@ -410,8 +509,8 @@ will be hospitalized (have inpatient expenditures > $0) in the given year.
 - **Prediction label**: The app uses the classification threshold you set in the sidebar  
   (currently **{threshold*100:.0f}%**) to turn the probability into **Hospitalized** vs **Not Hospitalized**.
 
-This model was trained on MEPS (Medical Expenditure Panel Survey) data using demographic and socioeconomic, 
-features.
+This model was trained on MEPS (Medical Expenditure Panel Survey) data using demographic, socioeconomic, 
+and health status features.
         """)
 
 
@@ -463,14 +562,15 @@ st.subheader("SHAP Waterfall Plot (Top 10 Features)")
 
 with st.expander("ℹ️ How to read this chart"):
         st.markdown("""
-The waterfall chart shows how each feature moves the prediction from the **base value** 
-(average model output) to this patient's final predicted risk.
+The waterfall chart shows how each feature contributes to move the prediction from the **expected value** (base value) to this specific patient's prediction.
 
-- Left: the **base value** (average risk across all patients  
-- Middle bars: each feature pushes the risk **up** (red) or **down** (blue)  
-- Right: the **final prediction** for this patient  
+- **Left (base value)**: The model's average output across all training examples (expected value)
+- **Middle bars**: Each feature's SHAP contribution - how much it pushes the prediction away from the base value
+  - Red bars: Positive contributions (increase risk)
+  - Blue bars: Negative contributions (decrease risk)
+- **Right (final value)**: The sum of base value + all SHAP contributions = this patient's predicted risk
 
-Features are ordered by how much they change the prediction, so the ones at the top are the most influential.
+The features are ordered by the magnitude of their contribution, with the most influential features at the top. The bars accumulate from left to right, showing how each feature moves the prediction toward the final value.
         """)
 
 
@@ -538,7 +638,22 @@ else:
 
 # Step 3: What-if analysis
 st.header("Step 3: What If? Analysis")
-st.markdown("Change some features and see how the prediction changes:")
+st.markdown("**Explore counterfactual scenarios: change features and see how the prediction changes**")
+
+with st.expander("ℹ️ What is counterfactual analysis?"):
+        st.markdown("""
+**Counterfactual analysis** (also called "What If?" analysis) lets you explore how changing specific features 
+would affect the model's prediction, while keeping everything else the same.
+
+This is useful for:
+- Understanding which features have the biggest impact on predictions
+- Exploring fairness: seeing how demographic changes affect risk
+- Testing scenarios: "What if this person had better insurance?" or "What if they were 10 years older?"
+
+The comparison shows you the original risk, the new risk after changes, and the difference between them.
+        """)
+
+st.markdown("Change some features below and see how the prediction changes:")
 
 col1, col2 = st.columns(2)
 
@@ -758,5 +873,20 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("")
+with st.expander("ℹ️ What is an ICE Curve?"):
+        st.markdown(f"""
+**Individual Conditional Expectation (ICE)** curves show how the model's prediction changes as a single feature varies, 
+while all other features remain constant at their current values.
+
+- **X-axis**: Age (0-90 years)
+- **Y-axis**: Predicted hospitalization risk (%)
+- **Blue line**: Shows how risk changes across different ages for this specific patient profile
+- **Red dashed line**: Marks your current age ({age} years) and corresponding risk ({pred_risk:.1f}%)
+
+This helps you understand how age affects predictions for someone with your exact combination of other characteristics 
+(sex, race, insurance, health conditions, etc.). Unlike partial dependence plots which show average effects across all 
+patients, ICE curves show the effect for this specific individual.
+        """)
+
 st.markdown(f"**Interpretation:** The curve shows how hospitalization risk changes with age while keeping all other features constant. Your current age ({age} years) corresponds to a predicted risk of {pred_risk:.1f}%.")
 

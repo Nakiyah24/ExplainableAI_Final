@@ -11,6 +11,20 @@ The system predicts whether an individual is likely to experience a hospital sta
 
 The final LightGBM model provides high predictive performance, while SHAP values offer a clear, intuitive view of why the model makes each prediction. Users can see which features increase or decrease hospitalization risk, compare outcomes across demographic groups, and explore fairness-related patterns in model behavior.
 
+## Novel Components & Creativity
+
+This project includes several creative and novel aspects:
+
+1. **Interactive Explainability Playground**: Unlike static model explanations, this app provides real-time SHAP explanations that update instantly as users modify patient characteristics. The "What If?" analysis allows users to explore counterfactual scenarios interactively.
+
+2. **ICE Curve Visualization**: The Individual Conditional Expectation (ICE) curve for age provides a novel way to visualize how a single feature (age) affects predictions across its entire range, while keeping all other factors constant. This helps users understand non-linear relationships in the model.
+
+3. **Real-time Feature Impact Analysis**: The app combines multiple explainability techniques (SHAP waterfall plots, feature importance rankings, and textual summaries) in a single, cohesive interface that updates in real-time.
+
+4. **Healthcare Fairness Focus**: The project specifically addresses fairness in healthcare predictions by allowing users to explore how demographic and socioeconomic factors affect predictions, making model biases transparent and explorable.
+
+5. **End-to-End Pipeline**: The project demonstrates a complete ML pipeline from raw data cleaning (handling MEPS special codes) through model training, evaluation, explainability analysis, and interactive deployment - all documented and reproducible.
+
 ### Files
 
 1. **`model.ipynb`** - My main notebook where I did all the data cleaning, model training, and analysis
@@ -72,12 +86,19 @@ Main packages:
 
 ### Running the Streamlit App
 
-Just run:
+**Prerequisites**: Make sure you've run the notebook first to generate the required model files in `fairness_artifacts/` and `fairness_results/` directories.
+
+Then run:
 ```bash
 streamlit run app.py
 ```
 
-It'll open in your browser automatically.
+The app will automatically open in your default web browser at `http://localhost:8501`
+
+**Troubleshooting**:
+- If you get an error about missing files, make sure you've run all cells in `model.ipynb` first
+- If the app doesn't open automatically, manually navigate to the URL shown in the terminal
+- Make sure all dependencies from `requirements.txt` are installed
 
 ## App Features
 
@@ -153,11 +174,25 @@ I used **SHAP (SHapley Additive exPlanations)** to understand what the model is 
 
 **Important Note**: I used ChatGPT-5 to help me build the Streamlit app code (`app.py`). The app structure, UI components, and Streamlit-specific code were developed partly with llm assistance. However, **all of the analysis, model training, feature engineering, interpretations, and insights in the notebook are entirely my own work**. The model choices, evaluation approach, SHAP analysis, and all conclusions are all my own based on what we have learned in class and the assignments we have done for the class.
 
+## Course Material Reflection
+
+This project demonstrates understanding and application of key concepts from the Explainable AI course:
+
+- **Model Explainability**: Extensive use of SHAP (SHapley Additive exPlanations) for both global and local explanations, following best practices for interpretable ML
+- **Fairness Analysis**: Exploration of how model predictions vary across demographic groups (race, sex, poverty, insurance status)
+- **Gradient Boosting**: Implementation and comparison of LightGBM and XGBoost, following best practices for hyperparameter tuning and cross-validation
+- **Feature Engineering**: Proper handling of categorical variables through one-hot encoding, missing value imputation, and feature selection
+- **Model Evaluation**: Comprehensive evaluation using ROC-AUC, precision, recall, F1-score, and stratified cross-validation to handle class imbalance
+- **Interactive Visualization**: Creation of an interactive web application using Streamlit to make model explanations accessible to non-technical users
+- **ICE Plots**: Implementation of Individual Conditional Expectation curves to visualize feature effects
+- **Real-time Explanations**: On-the-fly computation of SHAP values for individual predictions, demonstrating understanding of local explainability
+
 ## References
 
 - **MEPS Dataset**: [AHRQ MEPS Website](https://meps.ahrq.gov/mepsweb/)
-- **Model Approach**: Based on literature research 
+- **Model Approach**: Based on literature research showing gradient boosting effectiveness for healthcare tabular data
 - **SHAP Documentation**: [SHAP GitHub](https://github.com/slundberg/shap)
+- **LightGBM Documentation**: [LightGBM Documentation](https://lightgbm.readthedocs.io/)
 
 ## License
 
