@@ -125,12 +125,6 @@ def create_feature_vector(age, sex, race_ethnicity, poverty_category,
         education_years = default_values['education_years']
     if family_income is None:
         family_income = default_values['family_income']
-    if years_in_us is None:
-        years_in_us = default_values['years_in_us']
-    if education_years is None:
-        education_years = default_values['education_years']
-    if family_income is None:
-        family_income = default_values['family_income']
     
     # Start with all zeros, then fill in the values
     # Had issues with feature order mismatch before, so being careful here
@@ -436,8 +430,6 @@ with col3:
             pred_label,
             help=f"Uses a {threshold*100:.0f}% threshold on the predicted probability."
         )
-
-st.markdown("---")
 
 st.markdown("---")
 

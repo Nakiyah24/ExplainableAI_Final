@@ -11,4 +11,4 @@ __pycache__/
 .vscode/
 .idea/
 
-data/meps_2023/*
+data/meps_2023/extra/*

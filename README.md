@@ -1,108 +1,99 @@
 # Healthcare Prediction Model with Explainable AI
 
-A machine learning project that predicts hospitalization risk using the MEPS (Medical Expenditure Panel Survey) dataset, with a focus on model explainability and fairness analysis. The project includes a Jupyter notebook for model training and a Streamlit web app for interactive predictions and explanations.
+This project predicts hospitalization risk using the MEPS (Medical Expenditure Panel Survey) dataset. I built a LightGBM model and created an interactive Streamlit app to explore predictions and understand what drives them. The main focus is on explainability - making it clear why the model makes certain predictions and how different factors affect risk.
 
-## Project Overview
+## What This Project Does
 
-This project builds a predictive model to estimate hospitalization risk based on demographic, socioeconomic, and health status features. The model uses gradient boosting (LightGBM) and provides real-time SHAP explanations to help users understand how different factors influence predictions.
+I trained a model to predict whether someone will be hospitalized based on their demographics, socioeconomic status, and health conditions. The model uses LightGBM (a gradient boosting algorithm) and I integrated SHAP explanations so you can see exactly which features are driving each prediction.
 
-### Key Components
+### Files
 
-1. **`1_analysis.ipynb`** - Complete data processing, model training, evaluation, and explainability analysis
-2. **`app.py`** - Interactive Streamlit web application for making predictions and exploring model behavior
+1. **`1_analysis.ipynb`** - My main notebook where I did all the data cleaning, model training, and analysis
+2. **`app.py`** - The Streamlit web app I built to interact with the model (see acknowledgments below)
 
 ## Dataset
 
-The project uses the **MEPS 2023 Full Year Consolidated Data File (PUF Number: HC251)** from the Medical Expenditure Panel Survey.
+I used the **MEPS 2023 Full Year Consolidated Data File (PUF Number: HC251)** from the Medical Expenditure Panel Survey. MEPS is a great dataset for healthcare research because it tracks people's medical expenses and health status over time.
 
-- **Data Source**: [MEPS Official Website](https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp)
-- **Alternative Download**: [Google Sheets Link](https://docs.google.com/spreadsheets/d/1N9di-8jFzqyF79VKopojHTmIvPyIoh9p/edit?usp=drive_link)
+- **Official Source**: [MEPS Website](https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp)
 
-The dataset includes:
+The data includes:
 - Demographics: age, sex, race/ethnicity
-- Socioeconomic: income, education, poverty level, region
+- Socioeconomic stuff: income, education, poverty level, region
 - Health status: chronic conditions (hypertension, diabetes, asthma), smoking status
 - Insurance coverage
-- Healthcare utilization: inpatient expenditures (used as target variable)
+- Healthcare utilization: inpatient expenditures (I used this to create the target variable - whether someone was hospitalized)
 
 ## Installation
 
-### Prerequisites
+You'll need Python 3.8 or higher. Then just:
 
-- Python 3.8 or higher
-- pip package manager
+1. Clone or download this repo
 
-### Setup
-
-1. Clone or download this repository
-
-2. Install required packages:
+2. Install the packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-Key dependencies:
-- `streamlit` - Web app framework
-- `pandas`, `numpy`, `polars` - Data processing
-- `lightgbm`, `xgboost` - Gradient boosting models
-- `shap` - Model explainability
-- `scikit-learn` - Machine learning utilities
-- `plotly`, `matplotlib` - Visualization
-- `joblib` - Model serialization
-- `openpyxl` - Excel file reading
+Main packages you'll need:
+- `streamlit` - For the web app
+- `pandas`, `numpy`, `polars` - Data processing (polars is fast!)
+- `lightgbm` - The model I used
+- `shap` - For explainability
+- `scikit-learn` - ML utilities
+- `plotly`, `matplotlib` - Plotting
+- `joblib` - Saving/loading models
+- `openpyxl` - Reading Excel files
 
 ## Usage
 
 ### Running the Analysis Notebook
 
-1. Open `1_analysis.ipynb` in Jupyter Notebook or JupyterLab
+1. Make sure the Excel file `h251.xlsx` is in the `data/meps_2023/` directory (it should already be there if you cloned the repo)
 
-2. The notebook includes:
-   - **Data Loading & Cleaning**: Handling MEPS special codes, missing values
-   - **Feature Engineering**: Variable renaming, one-hot encoding, target variable creation
-   - **Model Training**: LightGBM and XGBoost with stratified cross-validation
-   - **Model Evaluation**: ROC-AUC, precision, recall, F1-score, confusion matrix
-   - **Explainability**: SHAP values, permutation importance, local explanations
-   - **Model Export**: Saves trained model and artifacts for the Streamlit app
+2. Open `1_analysis.ipynb` in Jupyter Notebook or JupyterLab
 
-3. Run all cells to:
-   - Train the final model
-   - Generate SHAP explainer
-   - Save model artifacts to `fairness_artifacts/` and `fairness_results/` directories
+3. The notebook walks through:
+   - Loading and cleaning the MEPS data (handling those weird negative codes they use for missing values)
+   - Feature engineering - renaming variables, one-hot encoding, creating the target variable
+   - Model training - I compared LightGBM and XGBoost, LightGBM won
+   - Evaluation - ROC-AUC, precision, recall, all that good stuff
+   - Explainability - SHAP values to understand what the model is doing
+   - Exporting everything needed for the Streamlit app
+
+4. Run all cells to train the model and generate all the artifacts
+
+**Note**: The notebook expects the data file at `./data/meps_2023/h251.xlsx`. Make sure this file exists before running the notebook.
 
 ### Running the Streamlit App
 
-1. Start the app:
+Just run:
 ```bash
 streamlit run app.py
 ```
 
-2. The app will open in your browser at `http://localhost:8501`
+It'll open in your browser automatically.
 
 ## App Features
 
-The Streamlit app provides an interactive interface for exploring model predictions:
+The app lets you play around with the model interactively:
 
 ### Step 1: Model Prediction
-- Input patient characteristics via sidebar controls
-- View predicted hospitalization risk (percentage)
-- See risk category (Low/Medium/High)
-- Get binary prediction (Hospitalized/Not Hospitalized) based on adjustable threshold
+Use the sidebar to set patient characteristics, then see:
+- Predicted hospitalization risk as a percentage
+- Risk category (Low/Medium/High)
+- Binary prediction (Hospitalized/Not Hospitalized) based on a threshold you can adjust
 
 ### Step 2: Local SHAP Explanation
-- **SHAP Waterfall Plot**: Visual breakdown of how each feature contributes to the prediction
-- **Feature Impact**: Top 10 features ranked by their influence
-- **Textual Summary**: Plain-language explanation of what's driving the risk up or down
+- **SHAP Waterfall Plot**: Shows how each feature pushes the prediction up or down
+- **Top Features**: The 10 most important features for this specific prediction
+- **Summary**: A quick text explanation of what's driving the risk
 
 ### Step 3: What If? Analysis
-- Modify key features (insurance type, sex, age, poverty category, hypertension)
-- See how predictions change in real-time
-- Compare original vs. modified risk side-by-side
+Change features like insurance type, age, or poverty category and see how the prediction changes in real-time. Useful for understanding how different factors affect risk.
 
 ### Step 4: ICE Curve - Age Effect
-- Interactive plot showing how predicted risk changes across different ages (0-90)
-- Vertical line marking the current patient's age
-- Helps visualize the model's age-related patterns
+An interactive plot showing how risk changes as age increases (keeping everything else constant). There's a line marking the current patient's age so you can see where they fall on the curve.
 
 ## File Structure
 
@@ -128,33 +119,34 @@ The Streamlit app provides an interactive interface for exploring model predicti
 ## Model Details
 
 ### Algorithm
-- **Primary Model**: LightGBM (selected after comparing with XGBoost)
-- **Performance**: ROC-AUC ~0.74 on test set
-- **Training**: Stratified 5-fold cross-validation to handle class imbalance
+I used **LightGBM** after comparing it with XGBoost. LightGBM performed slightly better (ROC-AUC ~0.74 vs 0.72) and trains faster. I used stratified 5-fold cross-validation to make sure each fold had a good balance of hospitalized vs non-hospitalized cases.
 
 ### Target Variable
-- **`hospitalized`**: Binary variable (1 if inpatient expenditures > $0, 0 otherwise)
-- Created from `inpatient_expenditures` field in MEPS data
+I created a binary `hospitalized` variable: 1 if someone had any inpatient expenditures > $0, 0 otherwise. This comes from the `inpatient_expenditures` field in the MEPS data.
 
 ### Features
-The model uses 50 features including:
+The model uses about 50 features:
 - **Numeric**: age, education_years, family_income, years_in_us
-- **Categorical (one-hot encoded)**: sex, race/ethnicity, poverty category, insurance coverage, region, chronic conditions, smoking status
+- **Categorical** (one-hot encoded): sex, race/ethnicity, poverty category, insurance coverage, region, chronic conditions, smoking status
 
 ## Explainability
 
-The project uses **SHAP (SHapley Additive exPlanations)** for model interpretability:
+I used **SHAP (SHapley Additive exPlanations)** to understand what the model is doing:
 
-- **Global Importance**: Permutation importance to identify most important features overall
-- **Local Explanations**: SHAP values for individual predictions showing feature contributions
-- **Dependence Plots**: Visualize how specific features affect predictions across their value ranges
+- **Global Importance**: Which features matter most overall (age is by far the biggest predictor)
+- **Local Explanations**: For each individual prediction, which features pushed it up or down
+- **Dependence Plots**: How specific features affect predictions across their value ranges
 
 ## Technical Notes
 
-- The app uses Streamlit's caching (`@st.cache_resource`, `@st.cache_data`) for performance
-- Feature vectors must match the exact order expected by the trained model
-- SHAP computations are done on-the-fly for real-time explanations
-- The model handles missing values using median imputation for numeric features
+- The app uses Streamlit's caching to avoid reloading the model every time
+- Feature vectors have to match the exact order the model expects (this caused me some headaches!)
+- SHAP values are computed on-the-fly for real-time explanations
+- Missing values are handled with median imputation for numeric features
+
+## Acknowledgments
+
+**Important Note**: I used ChatGPT-5 (via Cursor) to help me build the Streamlit app code (`app.py`). The app structure, UI components, and Streamlit-specific code were developed with AI assistance. However, **all of the analysis, model training, feature engineering, interpretations, and insights in the notebook are entirely my own work**. The model choices, evaluation approach, SHAP analysis, and all conclusions are based on my own analysis of the data.
 
 ## References
 
