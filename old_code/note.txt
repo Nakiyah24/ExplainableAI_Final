@@ -1,0 +1,44 @@
+Load raw MEPS
+
+Clean + rename
+
+Handle special codes
+
+One-hot encode
+
+Train/test model
+
+Evaluate
+
+Refit full model
+
+Build df_meta
+
+Save:
+
+df_meta.parquet or .csv
+
+----
+You’ve successfully built:
+
+A clean artifact loader
+
+A clean model-output layer (df_eval)
+
+A clean fairness-ready merged table (df_fair)
+
+You are perfectly set up for:
+
+Step 4 (encoding demographics)
+
+Step 5 (group metrics)
+
+Step 6 (disparity metrics)
+
+Step 7 (global explanations)
+
+Step 8 (local explanations)
+
+Step 9 (SHAP integration)
+
+Step 10 (counterfactuals — later)
