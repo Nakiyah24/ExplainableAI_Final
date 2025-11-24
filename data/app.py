@@ -167,14 +167,14 @@ def create_feature_vector(age, sex, race_ethnicity, poverty_category,
     region_code = REGION_MAP[region]
     features[f'region_{region_code}'] = 1.0
     
-    # Some features not in the sidebar - set to defaults
+    # keeping some features not in the sidebar
     # These don't seem to matter much but model expects them
-    features['race_simple_2'] = 1.0  # White
+    features['race_simple_2'] = 1.0
     features['insurance_category_1'] = 1.0
     features['born_in_usa_1'] = 1.0
     features['coronary_hd_dx_2'] = 1.0  # No coronary HD
     
-    # Make sure everything is float (model is picky about types)
+    # float type
     features = features.astype(float)
     
     return features
@@ -217,9 +217,7 @@ def generate_shap_summary(shap_values, feature_names, top_n=8):
     return " ".join(summary_parts)
 
 def pretty_feature_name(col: str) -> str:
-    # Converts model feature names to something readable
-    # This matches what I did in the notebook
-    # Base numeric features
+    # Converting to readable feature names
     base_label_map = {
         "age": "Age",
         "education_years": "Years of education",
@@ -392,7 +390,7 @@ feature_vector = create_feature_vector(
 # Step 1: Get the prediction
 st.header("Step 1: Model Prediction")
 
-# Make sure features are in the right order (this caused bugs before)
+# Makeing sure features are in the right order 
 feature_vector_aligned = feature_vector[model_feature_order].copy()
 pred_proba = model.predict_proba(feature_vector_aligned)[0, 1]
 pred_risk = pred_proba * 100
@@ -406,18 +404,18 @@ will be hospitalized (have inpatient expenditures > $0) in the given year.
 
 - **Risk Percentage**: The probability expressed as a percentage (0–100%)
 - **Risk Categories**:
-  - 🟢 **Low**: &lt; 10% risk  
-  - 🟡 **Medium**: 10–25% risk  
-  - 🔴 **High**: &gt; 25% risk  
+  - **Low**: &lt; 10% risk  
+  - **Medium**: 10–25% risk  
+  - **High**: &gt; 25% risk  
 - **Prediction label**: The app uses the classification threshold you set in the sidebar  
   (currently **{threshold*100:.0f}%**) to turn the probability into **Hospitalized** vs **Not Hospitalized**.
 
-This model was trained on MEPS (Medical Expenditure Panel Survey) data using demographic, socioeconomic, 
-and health status features.
+This model was trained on MEPS (Medical Expenditure Panel Survey) data using demographic and socioeconomic, 
+features.
         """)
 
 
-st.markdown("")  # Spacing
+st.markdown("") 
 col1, col2, col3 = st.columns(3)
 with col1:
         st.metric("Predicted Hospitalization Risk", f"{pred_risk:.1f}%")
